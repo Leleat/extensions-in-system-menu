@@ -30,16 +30,16 @@ class Extension {
 	enable() {
 		const extensionsApp = this.getExtensionsApp();
 		if (!extensionsApp)
-			return;
+			return this.notifyNotInstalled();
 
 		const [icon, name] = [extensionsApp.app_info.get_icon().names[0], extensionsApp.get_name()];
 		this.extensionsMenuItem = new popupMenu.PopupImageMenuItem(name, icon);
-		this.systemMenu = main.panel.statusArea.aggregateMenu._system;
-		this.systemMenu.menu.addMenuItem(this.extensionsMenuItem);
-		
-		const menuItems = this.systemMenu.menu._getMenuItems();
-		this.menuItemPos = menuItems.indexOf(this.systemMenu._settingsItem) + 1;
-		this.systemMenu.menu.moveMenuItem(this.extensionsMenuItem, this.menuItemPos);
+		const systemMenu = main.panel.statusArea.aggregateMenu._system;
+		systemMenu.menu.addMenuItem(this.extensionsMenuItem);
+
+		const menuItems = systemMenu.menu._getMenuItems();
+		const menuItemPos = menuItems.indexOf(systemMenu._settingsItem) + 1;
+		systemMenu.menu.moveMenuItem(this.extensionsMenuItem, menuItemPos);
 
 		this.extensionsMenuItem.connect("activate", this.onActivate.bind(this));
 	}
@@ -48,12 +48,10 @@ class Extension {
 		if (!this.extensionsMenuItem)
 			return;
 
-		this.systemMenu.menu._getMenuItems().splice(this.menuItemPos, 1);
 		this.extensionsMenuItem.destroy();
 		this.extensionsMenuItem = null;
-		this.systemMenu = null;
 	}
-	
+
 	getExtensionsApp() {
 		const extensionsID = "org.gnome.Extensions.desktop";
 		return Shell.AppSystem.get_default().lookup_app(extensionsID);
@@ -61,14 +59,22 @@ class Extension {
 
 	onActivate() {
 		const extensionsApp = this.getExtensionsApp();
-		if (!extensionsApp) {
-			main.notify("Extensions in system menu", "The 'Extensions' app isn't installed anymore.");
-			return;
-		}
+		if (!extensionsApp) // app got uninstalled while this extension was active
+			return this.notifyNotInstalled();
 
-		main.overview.hide();            
-		this.systemMenu.menu.itemActivated(boxpointer.PopupAnimation.NONE);
+		main.overview.hide();
+		const systemMenu = main.panel.statusArea.aggregateMenu._system;
+		systemMenu.menu.itemActivated(boxpointer.PopupAnimation.NONE);
 		extensionsApp.activate();
+	}
+
+	notifyNotInstalled() {
+		const missingAppTitle = "Extension-in-system-menu";
+		const missingAppMsg = "Install the 'Extensions' app and reload this extension.";
+		log(`--- ${missingAppTitle}: ${missingAppMsg} ---`);
+		main.notify(missingAppTitle, missingAppMsg);
+
+		this.disable(); // only destroys the menuItem
 	}
 }
 

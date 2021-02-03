@@ -2,6 +2,6 @@
   "name": "Extensions in system menu",
   "description": "Put the Extensions app into the system menu.",
   "uuid": "extensions-in-system-menu@leleat-on-github",
-  "shell-version": ["3.38"],
+  "shell-version": ["3.36", "3.38"],
   "url": "https://github.com/Leleat/extensions-in-system-menu"
 }

@@ -21,6 +21,14 @@
 const {boxpointer, main, popupMenu} = imports.ui;
 const {Shell} = imports.gi;
 
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+
+const Gettext = imports.gettext;
+Gettext.textdomain("extensions-in-system-menu@leleat-on-github");
+Gettext.bindtextdomain("extensions-in-system-menu@leleat-on-github", Me.dir.get_child("locale").get_path());
+const _ = Gettext.gettext;
+
 // inspired by tweaks in system menu
 // https://extensions.gnome.org/extension/1653/tweaks-in-system-menu/
 class Extension {
@@ -70,7 +78,7 @@ class Extension {
 
 	notifyNotInstalled() {
 		const missingAppTitle = "Extension-in-system-menu";
-		const missingAppMsg = "Install the 'Extensions' app and reload this extension.";
+		const missingAppMsg = _("Install the 'Extensions' app and reload this extension.");
 		log(`--- ${missingAppTitle}: ${missingAppMsg} ---`);
 		main.notify(missingAppTitle, missingAppMsg);
 

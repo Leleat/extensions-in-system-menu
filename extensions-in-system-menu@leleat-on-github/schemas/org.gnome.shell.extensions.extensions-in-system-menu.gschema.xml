@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+	<schema id="org.gnome.shell.extensions.extensions-in-system-menu" path="/org/gnome/shell/extensions/extensions-in-system-menu/">
+		<key name="extensions" type="b">
+			<default>true</default>
+		</key>
+
+		<key name="tweaks" type="b">
+			<default>false</default>
+		</key>
+	</schema>
+</schemalist>

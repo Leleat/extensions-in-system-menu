@@ -1,6 +1,6 @@
-# Extensions in system menu
+# Extensions & Tweaks in system menu
 
-A GNOME extension that adds a menu item to the system menu which opens the Extensions app.
+A GNOME extension, which adds menu items to the system menu for the `Extensions` or the `Tweaks` app.
 
 ![Preview](preview.png)
 

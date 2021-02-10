@@ -17,6 +17,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: extension.js:77
-msgid "Install the 'Extensions' app and reload this extension."
-msgstr "Installiere die 'Erweiterungen' app und schalte diese Erweiterung aus und wieder an."
+#: extension.js:98
+#, javascript-format
+msgid "Install the '%s' app and re-enable this setting."
+msgstr "Installiere die '%s' app und schalte die Einstellung aus und wieder an."
+

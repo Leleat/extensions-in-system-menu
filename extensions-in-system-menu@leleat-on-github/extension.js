@@ -36,53 +36,68 @@ class Extension {
 	}
 
 	enable() {
-		const extensionsApp = this.getExtensionsApp();
-		if (!extensionsApp)
-			return this.notifyNotInstalled();
-
-		const [icon, name] = [extensionsApp.app_info.get_icon().names[0], extensionsApp.get_name()];
-		this.extensionsMenuItem = new popupMenu.PopupImageMenuItem(name, icon);
 		const systemMenu = main.panel.statusArea.aggregateMenu._system;
-		systemMenu.menu.addMenuItem(this.extensionsMenuItem);
+		const systemMenuItems = systemMenu.menu._getMenuItems();
+		const belowSystemPos = systemMenuItems.indexOf(systemMenu._settingsItem) + 1;
 
-		const menuItems = systemMenu.menu._getMenuItems();
-		const menuItemPos = menuItems.indexOf(systemMenu._settingsItem) + 1;
-		systemMenu.menu.moveMenuItem(this.extensionsMenuItem, menuItemPos);
+		this.settings = ExtensionUtils.getSettings("org.gnome.shell.extensions.extensions-in-system-menu");
+		this.settings.connect("changed::extensions", () => {
+			this.extensionsItem = this.settings.get_boolean("extensions")
+					? this.createSystemMenuItem("org.gnome.Extensions.desktop", belowSystemPos)
+					: this.extensionsItem?.destroy();
+		});
+		this.settings.connect("changed::tweaks", () => {
+			this.tweaksItem = this.settings.get_boolean("tweaks")
+					? this.createSystemMenuItem("org.gnome.tweaks.desktop", belowSystemPos + (this.extensionsItem ? 1 : 0))
+					: this.tweaksItem?.destroy();
+		});
 
-		this.extensionsMenuItem.connect("activate", this.onActivate.bind(this));
+		if (this.settings.get_boolean("extensions"))
+			this.extensionsItem = this.createSystemMenuItem("org.gnome.Extensions.desktop", belowSystemPos);
+
+		if (this.settings.get_boolean("tweaks"))
+			this.tweaksItem = this.createSystemMenuItem("org.gnome.tweaks.desktop", belowSystemPos + (this.extensionsItem ? 1 : 0));
 	}
 
 	disable() {
-		if (!this.extensionsMenuItem)
-			return;
+		this.extensionsItem = this.extensionsItem?.destroy();
+		this.tweaksItem = this.tweaksItem?.destroy();
 
-		this.extensionsMenuItem.destroy();
-		this.extensionsMenuItem = null;
+		this.settings.run_dispose();
+		this.settings = null;
 	}
 
-	getExtensionsApp() {
-		const extensionsID = "org.gnome.Extensions.desktop";
-		return Shell.AppSystem.get_default().lookup_app(extensionsID);
+	createSystemMenuItem(appID, pos) {
+		const app = Shell.AppSystem.get_default().lookup_app(appID);
+		if (!app)
+			return this.notifyNotInstalled(appID);
+
+		const [name, icon] = [app.get_name(), app.app_info.get_icon().names[0]];
+		const item = new popupMenu.PopupImageMenuItem(name, icon);
+		const systemMenu = main.panel.statusArea.aggregateMenu._system;
+		systemMenu.menu.addMenuItem(item);
+		systemMenu.menu.moveMenuItem(item, pos);
+
+		item.connect("activate", this.onActivate.bind(this, appID));
+		return item;
 	}
 
-	onActivate() {
-		const extensionsApp = this.getExtensionsApp();
-		if (!extensionsApp) // app got uninstalled while this extension was active
-			return this.notifyNotInstalled();
+	onActivate(appID) {
+		const app = Shell.AppSystem.get_default().lookup_app(appID);
+		if (!app) // app got uninstalled while this extension was active
+			return this.notifyNotInstalled(appID);
 
 		main.overview.hide();
 		const systemMenu = main.panel.statusArea.aggregateMenu._system;
 		systemMenu.menu.itemActivated(boxpointer.PopupAnimation.NONE);
-		extensionsApp.activate();
+		app.activate();
 	}
 
-	notifyNotInstalled() {
-		const missingAppTitle = "Extension-in-system-menu";
-		const missingAppMsg = _("Install the 'Extensions' app and reload this extension.");
+	notifyNotInstalled(appID) {
+		const missingAppTitle = "Extension & Tweaks in system menu";
+		const missingAppMsg = _("Install the '%s' app and re-enable this setting.").format("GNOME " + appID.split(".")[2]);
 		log(`--- ${missingAppTitle}: ${missingAppMsg} ---`);
 		main.notify(missingAppTitle, missingAppMsg);
-
-		this.disable(); // only destroys the menuItem
 	}
 }
 

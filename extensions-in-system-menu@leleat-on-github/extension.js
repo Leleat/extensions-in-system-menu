@@ -31,45 +31,44 @@ class Extension {
 
 	enable() {
 		this.settings = ExtensionUtils.getSettings("org.gnome.shell.extensions.extensions-in-system-menu");
-		this.settings.connect("changed::extensions", () => {
-			this.extensionsItem = this.settings.get_boolean("extensions")
-					? this.createSystemMenuItem("org.gnome.Extensions.desktop", this.settings.get_int("extensions-pos"))
-					: (this.extensionsItem ? this.extensionsItem.destroy() : null);
-		});
-		this.settings.connect("changed::tweaks", () => {
-			this.tweaksItem = this.settings.get_boolean("tweaks")
-					? this.createSystemMenuItem("org.gnome.tweaks.desktop", this.settings.get_int("tweaks-pos"))
-					: (this.tweaksItem ? this.tweaksItem.destroy() : null);
-		});
-		this.settings.connect("changed::extensions-pos", () => {
-			this.extensionsItem && this.extensionsItem.destroy();
-			this.extensionsItem = this.createSystemMenuItem("org.gnome.Extensions.desktop", this.settings.get_int("extensions-pos"));
-		});
-		this.settings.connect("changed::tweaks-pos", () => {
-			this.tweaksItem && this.tweaksItem.destroy();
-			this.tweaksItem = this.createSystemMenuItem("org.gnome.tweaks.desktop", this.settings.get_int("tweaks-pos"));
-		});
+		this.settings.connect("changed::extensions", () => this.updateItems());
+		this.settings.connect("changed::tweaks", () => this.updateItems());
+		this.settings.connect("changed::extensions-pos", () => this.updateItems());
+		this.settings.connect("changed::tweaks-pos", () => this.updateItems());
 
-		if (this.settings.get_boolean("extensions"))
-			this.extensionsItem = this.createSystemMenuItem("org.gnome.Extensions.desktop", this.settings.get_int("extensions-pos"));
-
-		if (this.settings.get_boolean("tweaks"))
-			this.tweaksItem = this.createSystemMenuItem("org.gnome.tweaks.desktop", this.settings.get_int("tweaks-pos"));
+		this.updateItems();
 	}
 
 	disable() {
-		if (this.extensionsItem) {
-			this.extensionsItem.destroy();
-			this.extensionsItem = null;
-		}
-
-		if (this.tweaksItem) {
-			this.tweaksItem.destroy();
-			this.tweaksItem = null;
-		}
+		this.extensionsItem && this.extensionsItem.destroy();
+		this.extensionsItem = null;
+		this.tweaksItem && this.tweaksItem.destroy();
+		this.tweaksItem = null;
 
 		this.settings.run_dispose();
 		this.settings = null;
+	}
+
+	updateItems() {
+		this.extensionsItem = this.extensionsItem && this.extensionsItem.destroy();
+		this.tweaksItem = this.tweaksItem && this.tweaksItem.destroy();
+
+		const extensionsPos = this.settings.get_int("extensions-pos");
+		const tweaksPos = this.settings.get_int("tweaks-pos");
+
+		const createExtensions = function() {
+			if (this.settings.get_boolean("extensions"))
+				this.extensionsItem = this.createSystemMenuItem("org.gnome.Extensions.desktop", extensionsPos);
+		}
+		const createTweaks = function() {
+			if (this.settings.get_boolean("tweaks"))
+				this.tweaksItem = this.createSystemMenuItem("org.gnome.tweaks.desktop", tweaksPos);
+		}
+
+		if (extensionsPos < tweaksPos)
+			createExtensions.call(this) || createTweaks.call(this);
+		else
+			createTweaks.call(this) || createExtensions.call(this);
 	}
 
 	createSystemMenuItem(appID, pos) {
@@ -81,9 +80,6 @@ class Extension {
 		const item = new popupMenu.PopupImageMenuItem(name, icon);
 		const systemMenu = main.panel.statusArea.aggregateMenu._system;
 		systemMenu.menu.addMenuItem(item);
-
-		pos = Math.max(0, pos);
-		pos = Math.min(pos, systemMenu.menu._getMenuItems().length - 1);
 		systemMenu.menu.moveMenuItem(item, pos);
 
 		item.connect("activate", this.onActivate.bind(this, appID));

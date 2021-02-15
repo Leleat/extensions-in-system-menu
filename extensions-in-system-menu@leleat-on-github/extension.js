@@ -44,12 +44,12 @@ class Extension {
 		this.settings.connect("changed::extensions", () => {
 			this.extensionsItem = this.settings.get_boolean("extensions")
 					? this.createSystemMenuItem("org.gnome.Extensions.desktop", belowSystemPos)
-					: this.extensionsItem?.destroy();
+					: (this.extensionsItem ? this.extensionsItem.destroy() : null);
 		});
 		this.settings.connect("changed::tweaks", () => {
 			this.tweaksItem = this.settings.get_boolean("tweaks")
 					? this.createSystemMenuItem("org.gnome.tweaks.desktop", belowSystemPos + (this.extensionsItem ? 1 : 0))
-					: this.tweaksItem?.destroy();
+					: (this.tweaksItem ? this.tweaksItem.destroy() : null);
 		});
 
 		if (this.settings.get_boolean("extensions"))
@@ -60,8 +60,15 @@ class Extension {
 	}
 
 	disable() {
-		this.extensionsItem = this.extensionsItem?.destroy();
-		this.tweaksItem = this.tweaksItem?.destroy();
+		if (this.extensionsItem) {
+			this.extensionsItem.destroy();
+			this.extensionsItem = null;
+		}
+
+		if (this.tweaksItem) {
+			this.tweaksItem.destroy();
+			this.tweaksItem = null;
+		}
 
 		this.settings.run_dispose();
 		this.settings = null;

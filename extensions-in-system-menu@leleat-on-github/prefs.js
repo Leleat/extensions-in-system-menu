@@ -28,13 +28,22 @@ const ExtensionsSystemMenuPrefsWidget = GObject.registerClass(
 			this.settings = new Gio.Settings({settings_schema: settingsSchema});
 
 			this.bindSettingsToUI(settingsSchema.list_keys());
+
+			// bind widgets together
+			const extensionsToggle = this.builder.get_object("extensions");
+			const extensionsPos = this.builder.get_object("extensions-pos-box");
+			extensionsToggle.bind_property("active", extensionsPos, "sensitive", GObject.BindingFlags.DEFAULT);
+
+			const tweaksToggle = this.builder.get_object("tweaks");
+			const tweaksPos = this.builder.get_object("tweaks-pos-box");
+			tweaksToggle.bind_property("active", tweaksPos, "sensitive", GObject.BindingFlags.DEFAULT);
 		}
 
 		// the widgets in prefs.ui need to have same ID as the keys in the gschema.xml
 		bindSettingsToUI(keys) {
 			// manually add the keys to the arrays in this function
 			const getBindProperty = function(key) {
-				const ints = [];
+				const ints = ["extensions-pos", "tweaks-pos"];
 				const bools = ["extensions", "tweaks"];
 
 				if (ints.includes(key))

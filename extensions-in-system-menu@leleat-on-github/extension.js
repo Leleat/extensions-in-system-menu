@@ -22,12 +22,6 @@ const {boxpointer, main, popupMenu} = imports.ui;
 const {Shell} = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-
-const Gettext = imports.gettext;
-Gettext.textdomain("extensions-in-system-menu@leleat-on-github");
-Gettext.bindtextdomain("extensions-in-system-menu@leleat-on-github", Me.dir.get_child("locale").get_path());
-const _ = Gettext.gettext;
 
 // inspired by tweaks in system menu
 // https://extensions.gnome.org/extension/1653/tweaks-in-system-menu/
@@ -36,27 +30,31 @@ class Extension {
 	}
 
 	enable() {
-		const systemMenu = main.panel.statusArea.aggregateMenu._system;
-		const systemMenuItems = systemMenu.menu._getMenuItems();
-		const belowSystemPos = systemMenuItems.indexOf(systemMenu._settingsItem) + 1;
-
 		this.settings = ExtensionUtils.getSettings("org.gnome.shell.extensions.extensions-in-system-menu");
 		this.settings.connect("changed::extensions", () => {
 			this.extensionsItem = this.settings.get_boolean("extensions")
-					? this.createSystemMenuItem("org.gnome.Extensions.desktop", belowSystemPos)
+					? this.createSystemMenuItem("org.gnome.Extensions.desktop", this.settings.get_int("extensions-pos"))
 					: (this.extensionsItem ? this.extensionsItem.destroy() : null);
 		});
 		this.settings.connect("changed::tweaks", () => {
 			this.tweaksItem = this.settings.get_boolean("tweaks")
-					? this.createSystemMenuItem("org.gnome.tweaks.desktop", belowSystemPos + (this.extensionsItem ? 1 : 0))
+					? this.createSystemMenuItem("org.gnome.tweaks.desktop", this.settings.get_int("tweaks-pos"))
 					: (this.tweaksItem ? this.tweaksItem.destroy() : null);
+		});
+		this.settings.connect("changed::extensions-pos", () => {
+			this.extensionsItem && this.extensionsItem.destroy();
+			this.extensionsItem = this.createSystemMenuItem("org.gnome.Extensions.desktop", this.settings.get_int("extensions-pos"));
+		});
+		this.settings.connect("changed::tweaks-pos", () => {
+			this.tweaksItem && this.tweaksItem.destroy();
+			this.tweaksItem = this.createSystemMenuItem("org.gnome.tweaks.desktop", this.settings.get_int("tweaks-pos"));
 		});
 
 		if (this.settings.get_boolean("extensions"))
-			this.extensionsItem = this.createSystemMenuItem("org.gnome.Extensions.desktop", belowSystemPos);
+			this.extensionsItem = this.createSystemMenuItem("org.gnome.Extensions.desktop", this.settings.get_int("extensions-pos"));
 
 		if (this.settings.get_boolean("tweaks"))
-			this.tweaksItem = this.createSystemMenuItem("org.gnome.tweaks.desktop", belowSystemPos + (this.extensionsItem ? 1 : 0));
+			this.tweaksItem = this.createSystemMenuItem("org.gnome.tweaks.desktop", this.settings.get_int("tweaks-pos"));
 	}
 
 	disable() {
@@ -83,6 +81,9 @@ class Extension {
 		const item = new popupMenu.PopupImageMenuItem(name, icon);
 		const systemMenu = main.panel.statusArea.aggregateMenu._system;
 		systemMenu.menu.addMenuItem(item);
+
+		pos = Math.max(0, pos);
+		pos = Math.min(pos, systemMenu.menu._getMenuItems().length - 1);
 		systemMenu.menu.moveMenuItem(item, pos);
 
 		item.connect("activate", this.onActivate.bind(this, appID));
@@ -102,7 +103,7 @@ class Extension {
 
 	notifyNotInstalled(appID) {
 		const missingAppTitle = "Extension & Tweaks in system menu";
-		const missingAppMsg = _("Install the '%s' app and re-enable this setting.").format("GNOME " + appID.split(".")[2]);
+		const missingAppMsg = `Install the GNOME ${appID.split(".")[2]} app and re-enable this setting`;
 		log(`--- ${missingAppTitle}: ${missingAppMsg} ---`);
 		main.notify(missingAppTitle, missingAppMsg);
 	}

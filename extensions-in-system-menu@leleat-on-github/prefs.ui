@@ -2,12 +2,17 @@
 <!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
-  <object class="GtkAdjustment" id="hot_corner_timer">
-    <property name="lower">100</property>
-    <property name="upper">1000</property>
-    <property name="value">200</property>
-    <property name="step-increment">10</property>
-    <property name="page-increment">50</property>
+  <object class="GtkAdjustment" id="extensions-adjustment">
+    <property name="upper">10</property>
+    <property name="value">1</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="tweaks-adjustment">
+    <property name="upper">10</property>
+    <property name="value">2</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
   </object>
   <object class="GtkBox" id="main_prefs">
     <property name="name">main_prefs</property>
@@ -61,6 +66,43 @@
       </packing>
     </child>
     <child>
+      <object class="GtkBox" id="extensions-pos-box">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Extensions position</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton" id="extensions-pos">
+            <property name="width-request">175</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="adjustment">extensions-adjustment</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack-type">end</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
       <object class="GtkBox" id="tweaks-box">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
@@ -94,7 +136,44 @@
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">1</property>
+        <property name="position">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox" id="tweaks-pos-box">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Tweaks position</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton" id="tweaks-pos">
+            <property name="width-request">175</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="adjustment">tweaks-adjustment</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack-type">end</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">3</property>
       </packing>
     </child>
   </object>

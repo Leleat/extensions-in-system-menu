@@ -8,5 +8,13 @@
 		<key name="tweaks" type="b">
 			<default>false</default>
 		</key>
+
+		<key name="extensions-pos" type="i">
+			<default>2</default>
+		</key>
+
+		<key name="tweaks-pos" type="i">
+			<default>3</default>
+		</key>
 	</schema>
 </schemalist>

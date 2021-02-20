@@ -8,6 +8,7 @@ A GNOME extension, which adds menu items to the system menu for the `Extensions`
 
 - 3.36
 - 3.38
+- 40
 
 ## Installation
 

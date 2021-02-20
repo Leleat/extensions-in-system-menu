@@ -2,7 +2,7 @@
   "name": "Extensions & Tweaks in system menu",
   "description": "Put the Extensions and/or the Tweaks app into the system menu.",
   "uuid": "extensions-in-system-menu@leleat-on-github",
-  "shell-version": ["3.36", "3.38"],
+  "shell-version": ["3.36", "3.38", "40.0"],
   "url": "https://github.com/Leleat/extensions-in-system-menu",
-  "version": 2
+  "version": 6
 }

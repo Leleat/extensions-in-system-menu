@@ -76,7 +76,8 @@ class Extension {
 		if (!app)
 			return this.notifyNotInstalled(appID);
 
-		const [name, icon] = [app.get_name(), app.app_info.get_icon().names[0]];
+		const iconNames = app.app_info.get_icon().names; // workaround #4
+		const [name, icon] = [app.get_name(), iconNames ? iconNames[0] : appID.slice(0, appID.lastIndexOf("."))];
 		const item = new popupMenu.PopupImageMenuItem(name, icon);
 		const systemMenu = main.panel.statusArea.aggregateMenu._system;
 		systemMenu.menu.addMenuItem(item);

@@ -1,4 +1,18 @@
-# Extensions & Tweaks in system menu
+**No longer supported after GNOME 40 because https://extensions.gnome.org/extension/1653/tweaks-in-system-menu/ now also supports the `Extensions` app.**
+.
+
+
+.
+
+.
+
+.
+
+.
+
+.
+
+## Extensions & Tweaks in system menu
 
 A GNOME extension, which adds menu items to the system menu for the `Extensions` or the `Tweaks` app.
 
